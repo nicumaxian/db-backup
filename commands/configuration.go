@@ -10,7 +10,7 @@ import (
 func ConfigurationCommands() *cli.Command {
 	return &cli.Command{
 		Name:  "config",
-		Usage: "Add/Edit/Delete configurations",
+		Usage: "Manage configurations",
 		Subcommands: []*cli.Command{
 			configurationAddCommand(),
 			configurationEditCommand(),
