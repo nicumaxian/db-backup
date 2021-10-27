@@ -234,18 +234,33 @@ func configurationDeleteCommand() *cli.Command {
 }
 
 func configurationListCommand() *cli.Command {
+	var name string
 	return &cli.Command{
-		Name: "list",
+		Name:  "list",
+		Usage: "Lists existing configurations",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "name",
+				Destination: &name,
+			},
+		},
 		Action: func(context *cli.Context) error {
 			cfg, err := configuration.Read()
 			if err != nil {
 				return fmt.Errorf("failed to read configuration")
 			}
+			if len(name) == 0 {
+				fmt.Printf("There are %v databases configured\n", len(cfg.Databases))
 
-			fmt.Printf("There are %v databases configured\n", len(cfg.Databases))
-
-			for key := range cfg.Databases {
-				fmt.Printf("\t%v\n", key)
+				for key := range cfg.Databases {
+					fmt.Printf("\t%v\n", key)
+				}
+			} else {
+				if dbConfiguration, ok := cfg.Databases[name]; ok {
+					fmt.Printf("Host: %v\n",dbConfiguration.Host)
+					fmt.Printf("Database: %v\n",dbConfiguration.Database)
+					fmt.Printf("Username: %v\n",dbConfiguration.Username)
+				}
 			}
 
 			return nil
