@@ -215,6 +215,16 @@ func configurationDeleteCommand() *cli.Command {
 				return err
 			}
 
+			var confirm bool
+			prompt := &survey.Confirm{
+				Message: "Are you sure you want to delete it?",
+			}
+			err = survey.AskOne(prompt, &confirm)
+			if !confirm {
+				fmt.Printf("Aborting")
+				return nil
+			}
+
 			cfg, err := configuration.Read()
 			if err != nil {
 				return err
