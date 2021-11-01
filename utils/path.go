@@ -28,7 +28,7 @@ func GetBackupPath(name string) (string, error) {
 		return "", err
 	}
 
-	timestamp := time.Now().Unix()
+	timestamp := time.Now().Format("2006-01-02 15-04-05")
 	backupPath := path.Join(location, fmt.Sprintf("%v.sql", timestamp))
 
 	return backupPath, nil
