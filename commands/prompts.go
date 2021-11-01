@@ -8,7 +8,7 @@ import (
 
 func promptValidConfigurationName() (string, error) {
 	var name string
-	err := survey.AskOne(&survey.Input{Message: "Configuration name"}, &name, survey.WithValidator(validateExistingConfigEntry()))
+	err := survey.AskOne(&survey.Input{Message: "Configuration name"}, &name, survey.WithValidator(survey.ComposeValidators(validateName(), validateExistingConfigEntry())))
 	if err != nil {
 		return "", err
 	}
@@ -18,7 +18,7 @@ func promptValidConfigurationName() (string, error) {
 
 func promptFreeConfigurationName() (string, error) {
 	var name string
-	err := survey.AskOne(&survey.Input{Message: "Configuration name"}, &name, survey.WithValidator(validateNotExistingConfigEntry()))
+	err := survey.AskOne(&survey.Input{Message: "Configuration name"}, &name, survey.WithValidator(survey.ComposeValidators(validateName(), validateNotExistingConfigEntry())))
 	if err != nil {
 		return "", err
 	}
