@@ -2,12 +2,13 @@ package commands
 
 import (
 	"db-backup/configuration"
+	"db-backup/utils"
 	"github.com/AlecAivazis/survey/v2"
 )
 
 func promptValidConfigurationName() (string, error) {
 	var name string
-	err := survey.AskOne(&survey.Input{Message: "Name of database entry"}, &name, survey.WithValidator(validateExistingConfigEntry()))
+	err := survey.AskOne(&survey.Input{Message: "Configuration name"}, &name, survey.WithValidator(validateExistingConfigEntry()))
 	if err != nil {
 		return "", err
 	}
@@ -17,7 +18,7 @@ func promptValidConfigurationName() (string, error) {
 
 func promptFreeConfigurationName() (string, error) {
 	var name string
-	err := survey.AskOne(&survey.Input{Message: "Name of database entry"}, &name, survey.WithValidator(validateNotExistingConfigEntry()))
+	err := survey.AskOne(&survey.Input{Message: "Configuration name"}, &name, survey.WithValidator(validateNotExistingConfigEntry()))
 	if err != nil {
 		return "", err
 	}
@@ -46,8 +47,12 @@ func promptConfigurationEntry(existingEntry configuration.DbConfiguration) (conf
 	}
 	var qs = []*survey.Question{
 		{
+			Name:   "driver",
+			Prompt: &survey.Select{Message: "Driver", Default: existingEntry.Driver, Options: []string{"postgres", "mysql"}},
+		},
+		{
 			Name:   "host",
-			Prompt: &survey.Input{Message: "Host", Default: existingEntry.Host},
+			Prompt: &survey.Input{Message: "Host", Default: utils.StrCoalesce(existingEntry.Host, "localhost")},
 		},
 		{
 			Name:   "database",
@@ -61,6 +66,7 @@ func promptConfigurationEntry(existingEntry configuration.DbConfiguration) (conf
 	}
 
 	type SurveyAnswer struct {
+		Driver   string `survey:"driver"`
 		Host     string `survey:"host"`
 		Database string `survey:"database"`
 		Username string `survey:"username"`
@@ -74,6 +80,7 @@ func promptConfigurationEntry(existingEntry configuration.DbConfiguration) (conf
 	}
 
 	return configuration.DbConfiguration{
+		Driver:   answers.Driver,
 		Host:     answers.Host,
 		Database: answers.Database,
 		Username: answers.Username,
