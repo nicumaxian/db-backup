@@ -1,7 +1,8 @@
 package configuration
 
 type DbConfiguration struct {
-	Host string `mapstructure:"host"`
+	Driver   string `mapstructure:"driver"`
+	Host     string `mapstructure:"host"`
 	Username string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
 	Database string `mapstructure:"database"`
