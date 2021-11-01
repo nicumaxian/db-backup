@@ -2,6 +2,7 @@ package commands
 
 import (
 	"db-backup/configuration"
+	"db-backup/drivers"
 	"db-backup/utils"
 	"github.com/AlecAivazis/survey/v2"
 )
@@ -48,7 +49,7 @@ func promptConfigurationEntry(existingEntry configuration.DbConfiguration) (conf
 	var qs = []*survey.Question{
 		{
 			Name:   "driver",
-			Prompt: &survey.Select{Message: "Driver", Default: existingEntry.Driver, Options: []string{"postgres", "mysql"}},
+			Prompt: &survey.Select{Message: "Driver", Default: existingEntry.Driver, Options: []string{drivers.PostgresDriver, drivers.MySqlDriver}},
 		},
 		{
 			Name:   "host",

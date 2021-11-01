@@ -19,6 +19,7 @@ func main() {
 			},
 		},
 		Commands: []*cli.Command{
+			commands.BackupCommand(),
 			commands.ConfigurationCommands(),
 		},
 	}
