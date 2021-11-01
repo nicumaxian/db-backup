@@ -2,6 +2,7 @@ package main
 
 import (
 	"db-backup/commands"
+	"db-backup/configuration"
 	"github.com/urfave/cli/v2"
 	"log"
 	"os"
@@ -9,17 +10,24 @@ import (
 
 func main() {
 	app := &cli.App{
-		Name:  "db-backup",
-		Usage: "A tool to backup and restore database easily",
+		Name:    "db-backup",
+		Usage:   "A tool to backup and restore database easily",
 		Version: "0.1",
 		Authors: []*cli.Author{
 			&cli.Author{
-				Name: "Nicu Maxian",
+				Name:  "Nicu Maxian",
 				Email: "maxiannicu@gmail.com",
 			},
 		},
 		Commands: []*cli.Command{
 			commands.ConfigurationCommands(),
+		},
+		Before: func(ctx *cli.Context) error {
+			commands.CreateConfigurationFolderIfDoesntExist(".db-backup")
+			commands.CreateInitialConfigurationFileIfDoesntExist(".db-backup", "config.yml",
+				configuration.Configuration{Databases: map[string]configuration.DbConfiguration{}})
+
+			return nil
 		},
 	}
 

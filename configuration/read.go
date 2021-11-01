@@ -14,7 +14,11 @@ func Read() (Configuration, error) {
 	err := v.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			return Configuration{}, NotFoundErr{}
+			//create empty config file
+
+			return Configuration{
+				Databases: map[string]DbConfiguration{},
+			}, nil
 		}
 
 		return configuration, err
