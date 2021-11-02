@@ -8,11 +8,15 @@ import (
 
 func CreateConfigurationFolderIfDoesntExist(userHomeDir string, baseDir string) error {
 	configurationFolderPath := path.Join(userHomeDir, baseDir)
-	if _, err := os.Stat(configurationFolderPath); os.IsNotExist(err) {
-		err = os.Mkdir(configurationFolderPath, 0755)
-		if err != nil {
-			return err
-		}
+
+	_, err := os.Stat(configurationFolderPath)
+	if err != nil {
+		return err
+	}
+
+	err = os.Mkdir(configurationFolderPath, 0755)
+	if err != nil {
+		return err
 	}
 
 	return nil
