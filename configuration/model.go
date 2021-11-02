@@ -11,3 +11,5 @@ type DbConfiguration struct {
 type Configuration struct {
 	Databases map[string]DbConfiguration `mapstructure:"databases"`
 }
+
+var Default = Configuration{Databases: map[string]DbConfiguration{}}
