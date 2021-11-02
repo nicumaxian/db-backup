@@ -3,7 +3,7 @@ package commands
 import (
 	"db-backup/configuration"
 	"db-backup/drivers"
-	"db-backup/utils"
+	"db-backup/storage"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/urfave/cli/v2"
 )
@@ -31,7 +31,7 @@ func BackupCommand() *cli.Command {
 				return err
 			}
 
-			path, err := utils.GetBackupPath(name)
+			path, err := storage.GetNewBackupPath(name)
 			if err != nil {
 				return err
 			}
