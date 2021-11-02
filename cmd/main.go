@@ -24,13 +24,12 @@ func main() {
 			commands.ConfigurationCommands(),
 		},
 		Before: func(ctx *cli.Context) error {
-			err := commands.CreateConfigurationFolderIfDoesntExist(storage.UserHomeDir, storage.BaseDir)
+			err := storage.CreateConfigurationFolderIfDoesntExist()
 			if err != nil {
 				return err
 			}
 
-			err = commands.CreateInitialConfigurationFileIfDoesntExist(storage.AppDir, storage.ConfigurationFilename,
-				configuration.Configuration{Databases: map[string]configuration.DbConfiguration{}})
+			err = storage.CreateInitialConfigurationFileIfDoesntExist(configuration.Configuration{Databases: map[string]configuration.DbConfiguration{}})
 			if err != nil {
 				return err
 			}
