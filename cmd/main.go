@@ -3,6 +3,7 @@ package main
 import (
 	"db-backup/commands"
 	"db-backup/configuration"
+	"db-backup/storage"
 	"github.com/urfave/cli/v2"
 	"log"
 	"os"
@@ -23,9 +24,16 @@ func main() {
 			commands.ConfigurationCommands(),
 		},
 		Before: func(ctx *cli.Context) error {
-			commands.CreateConfigurationFolderIfDoesntExist(".db-backup")
-			commands.CreateInitialConfigurationFileIfDoesntExist(".db-backup", "config.yml",
+			err := commands.CreateConfigurationFolderIfDoesntExist(storage.UserHomeDir, storage.BaseDir)
+			if err != nil {
+				return err
+			}
+
+			err = commands.CreateInitialConfigurationFileIfDoesntExist(storage.AppDir, storage.ConfigurationFilename,
 				configuration.Configuration{Databases: map[string]configuration.DbConfiguration{}})
+			if err != nil {
+				return err
+			}
 
 			return nil
 		},
