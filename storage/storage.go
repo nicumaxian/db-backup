@@ -8,7 +8,7 @@ import (
 
 var AppDir string
 var baseDir = ".db-backup"
-var configurationFilename = "config.yml"
+var configurationFilename = "config.yaml"
 
 func init() {
 	homeDir, err := os.UserHomeDir()
