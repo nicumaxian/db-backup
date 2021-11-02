@@ -29,7 +29,7 @@ func main() {
 				return err
 			}
 
-			err = storage.CreateInitialConfigurationFileIfDoesntExist(configuration.Configuration{Databases: map[string]configuration.DbConfiguration{}})
+			err = storage.CreateInitialConfigurationFileIfDoesntExist(configuration.Default)
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,7 @@
 package configuration
 
 type DbConfiguration struct {
-	Host string `mapstructure:"host"`
+	Host     string `mapstructure:"host"`
 	Username string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
 	Database string `mapstructure:"database"`
@@ -10,3 +10,5 @@ type DbConfiguration struct {
 type Configuration struct {
 	Databases map[string]DbConfiguration `mapstructure:"databases"`
 }
+
+var Default = Configuration{Databases: map[string]DbConfiguration{}}
