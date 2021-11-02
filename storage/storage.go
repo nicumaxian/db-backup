@@ -6,7 +6,6 @@ import (
 	"path"
 )
 
-var userHomeDir string
 var AppDir string
 var baseDir = ".db-backup"
 var configurationFilename = "config.yaml"
@@ -17,18 +16,14 @@ func init() {
 		panic(err)
 	}
 
-	userHomeDir = homeDir
 	AppDir = path.Join(homeDir, baseDir)
 }
 
-
 func CreateConfigurationFolderIfDoesntExist() error {
-	configurationFolderPath := path.Join(userHomeDir, baseDir)
-
-	_, err := os.Stat(configurationFolderPath)
+	_, err := os.Stat(AppDir)
 	switch os.IsNotExist(err) {
 	case true:
-		err = os.Mkdir(configurationFolderPath, 0755)
+		err = os.Mkdir(AppDir, 0755)
 		if err != nil {
 			return err
 		}
@@ -62,3 +57,4 @@ func CreateInitialConfigurationFileIfDoesntExist(seed interface{}) error {
 
 	return nil
 }
+

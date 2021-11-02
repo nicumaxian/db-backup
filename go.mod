@@ -4,6 +4,8 @@ go 1.17
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.2
+	github.com/briandowns/spinner v1.16.0
+	github.com/lib/pq v1.10.3
 	github.com/spf13/viper v1.9.0
 	github.com/urfave/cli/v2 v2.3.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -11,6 +13,7 @@ require (
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d // indirect
+	github.com/fatih/color v1.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
