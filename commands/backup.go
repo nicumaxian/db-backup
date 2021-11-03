@@ -6,16 +6,26 @@ import (
 	"db-backup/storage"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/urfave/cli/v2"
 	"github.com/briandowns/spinner"
+	"github.com/urfave/cli/v2"
 	"time"
 )
 
 func BackupCommand() *cli.Command {
-	var name string
 	return &cli.Command{
 		Name:  "backup",
 		Usage: "Create a backup",
+		Subcommands: []*cli.Command{
+			backupCreateCommand(),
+			backupListCommand(),
+		},
+	}
+}
+
+func backupCreateCommand() *cli.Command {
+	var name string
+	return &cli.Command{
+		Name: "create",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "configuration",
@@ -58,6 +68,38 @@ func BackupCommand() *cli.Command {
 
 			fmt.Println("Done")
 			fmt.Println(path)
+			return nil
+		},
+	}
+}
+
+func backupListCommand() *cli.Command {
+	var name string
+	return &cli.Command{
+		Name: "list",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "configuration",
+				Required:    true,
+				Destination: &name,
+			},
+		},
+		Action: func(context *cli.Context) error {
+			err := survey.ComposeValidators(validateName(), validateExistingConfigEntry())(name)
+			if err != nil {
+				return err
+			}
+
+
+			result, err := storage.GetBackups(name)
+			if err != nil {
+				return err
+			}
+
+			for _, el := range result {
+				fmt.Printf("%v\t%v\n", el.Name(), el.ModTime().Format(time.RFC822))
+			}
+
 			return nil
 		},
 	}
