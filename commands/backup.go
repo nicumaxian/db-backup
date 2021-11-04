@@ -86,7 +86,7 @@ func backupListCommand() *cli.Command {
 				return err
 			}
 
-			result, err := storage.GetBackups(name)
+			result, _, err := storage.GetBackups(name)
 			if err != nil {
 				return err
 			}

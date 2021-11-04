@@ -32,20 +32,20 @@ func GetNewBackupPath(configurationName string) (string, error) {
 	return backupPath, nil
 }
 
-func GetBackups(configurationName string) ([]fs.FileInfo, error) {
+func GetBackups(configurationName string) ([]fs.FileInfo, string, error) {
 	location, err := getBackupDataLocation(configurationName)
 	if err != nil {
-		return []fs.FileInfo{}, err
+		return []fs.FileInfo{}, "", err
 	}
 
 	dir, err := ioutil.ReadDir(location)
 	if err != nil {
-		return []fs.FileInfo{}, err
+		return []fs.FileInfo{}, "", err
 	}
 
 	sort.Slice(dir, func(i, j int) bool {
 		return dir[i].ModTime().After(dir[j].ModTime())
 	})
 
-	return dir, nil
+	return dir, location, nil
 }
