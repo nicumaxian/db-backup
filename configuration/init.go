@@ -11,7 +11,6 @@ func init() {
 func initConfiguration() *viper.Viper {
 	vNew := viper.New()
 	vNew.AddConfigPath("$HOME/.db-backup")
-	vNew.AddConfigPath(".")
 
 	vNew.SetConfigType("yaml")
 	vNew.SetConfigName("config")

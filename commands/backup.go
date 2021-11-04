@@ -4,9 +4,10 @@ import (
 	"db-backup/configuration"
 	"db-backup/drivers"
 	"db-backup/storage"
-	"fmt"
+	"db-backup/utils"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/briandowns/spinner"
+	"github.com/pterm/pterm"
 	"github.com/urfave/cli/v2"
 	"time"
 )
@@ -44,13 +45,11 @@ func backupCreateCommand() *cli.Command {
 				return err
 			}
 
-
 			path, err := storage.GetNewBackupPath(name)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println("Creating agent")
 			client, err := drivers.CreateDbClient(cfg.Databases[name])
 			if err != nil {
 				return err
@@ -58,16 +57,13 @@ func backupCreateCommand() *cli.Command {
 
 			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 			s.Start()
-			fmt.Println("Backing up")
 			err = client.Backup(path)
 			s.Stop()
 			if err != nil {
 				return err
 			}
 
-
-			fmt.Println("Done")
-			fmt.Println(path)
+			pterm.Println(path)
 			return nil
 		},
 	}
@@ -90,15 +86,28 @@ func backupListCommand() *cli.Command {
 				return err
 			}
 
-
 			result, err := storage.GetBackups(name)
 			if err != nil {
 				return err
 			}
 
-			for _, el := range result {
-				fmt.Printf("%v\t%v\n", el.Name(), el.ModTime().Format(time.RFC822))
+			if len(result) == 0 {
+				pterm.Println("There are no backups")
+				return nil
 			}
+
+			data := pterm.TableData{
+				{"Name", "Creation Date", "Size"},
+			}
+
+			for _, el := range result {
+				data = append(data, []string{
+					el.Name(),
+					el.ModTime().Format(time.RFC822),
+					utils.ByteCountSI(el.Size()),
+				})
+			}
+			pterm.DefaultTable.WithHasHeader().WithData(data).Render()
 
 			return nil
 		},
