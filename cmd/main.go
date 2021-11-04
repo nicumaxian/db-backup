@@ -22,6 +22,7 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			commands.BackupCommand(),
+			commands.RestoreCommand(),
 			commands.ConfigurationCommands(),
 		},
 		Before: func(ctx *cli.Context) error {

@@ -53,9 +53,21 @@ func (p PostgresDbClient) Restore(path string) error {
 		return err
 	}
 
-	_, err = db.Exec("select pg_terminate_backend(pid) from pg_stat_activity where datname=?;DROP DATABASE ?;CREATE DATABASE ?;", p.config.Database, p.config.Database, p.config.Database)
+	_, err = db.Exec("select pg_terminate_backend(pid) from pg_stat_activity where datname= $1", p.config.Database)
 	if err != nil {
-		spinner.Fail("Failed to reset database")
+		spinner.Fail("Failed to reset connections")
+		return err
+	}
+
+	_, err = db.Exec(fmt.Sprintf("DROP DATABASE %s", p.config.Database))
+	if err != nil {
+		spinner.Fail("Failed to recreate database")
+		return err
+	}
+
+	_, err = db.Exec(fmt.Sprintf("CREATE DATABASE %s;", p.config.Database))
+	if err != nil {
+		spinner.Fail("Failed to recreate database")
 		return err
 	}
 
