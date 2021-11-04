@@ -2,8 +2,11 @@ package storage
 
 import (
 	"fmt"
+	"io/fs"
+	"io/ioutil"
 	"os"
 	"path"
+	"sort"
 	"time"
 )
 
@@ -27,4 +30,22 @@ func GetNewBackupPath(configurationName string) (string, error) {
 	backupPath := path.Join(location, fmt.Sprintf("%v.sql", timestamp))
 
 	return backupPath, nil
+}
+
+func GetBackups(configurationName string) ([]fs.FileInfo, error) {
+	location, err := getBackupDataLocation(configurationName)
+	if err != nil {
+		return []fs.FileInfo{}, err
+	}
+
+	dir, err := ioutil.ReadDir(location)
+	if err != nil {
+		return []fs.FileInfo{}, err
+	}
+
+	sort.Slice(dir, func(i, j int) bool {
+		return dir[i].ModTime().After(dir[j].ModTime())
+	})
+
+	return dir, nil
 }
