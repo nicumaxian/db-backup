@@ -81,7 +81,7 @@ func (p PostgresDbClient) Restore(path string) error {
 	spinner, _ = pterm.DefaultSpinner.Start("Restoring data")
 	cmd := exec.Command("psql", "-U", p.config.Username, "-h", p.config.Host, "-f", path, p.config.Database)
 	cmd.Env = append(cmd.Env, fmt.Sprintf("PGPASSWORD=%v", p.config.Password))
-	//cmd.Env = append(cmd.Env, fmt.Sprintf("PATH=%v", os.Getenv("PATH")))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("PATH=%v", os.Getenv("PATH")))
 	err = cmd.Run()
 	if err != nil {
 		spinner.Fail("Restore failed")
