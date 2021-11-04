@@ -25,6 +25,10 @@ func Read() (Configuration, error) {
 		return configuration, err
 	}
 
+	if configuration.Databases == nil {
+		configuration = Default
+	}
+
 	return configuration, nil
 }
 
