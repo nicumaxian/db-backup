@@ -15,9 +15,13 @@ func main() {
 		Usage:   "A tool to backup and restore database easily",
 		Version: "0.1",
 		Authors: []*cli.Author{
-			&cli.Author{
+			{
 				Name:  "Nicu Maxian",
 				Email: "maxiannicu@gmail.com",
+			},
+			{
+				Name:  "Andrian Boscanean",
+				Email: "boscanean.andrian@gmail.com",
 			},
 		},
 		Commands: []*cli.Command{
