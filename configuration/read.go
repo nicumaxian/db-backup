@@ -26,7 +26,7 @@ func Read() (Configuration, error) {
 	}
 
 	if configuration.Databases == nil {
-		configuration.Databases = map[string]DbConfiguration{}
+		configuration = Default
 	}
 
 	return configuration, nil
