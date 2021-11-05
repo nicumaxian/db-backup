@@ -119,7 +119,7 @@ func backupListCommand() *cli.Command {
 }
 
 func backupDeleteCommand() *cli.Command {
-	var name string
+	var names = &cli.StringSlice{}
 	var config string
 	return &cli.Command{
 		Name:        "delete",
@@ -130,10 +130,10 @@ func backupDeleteCommand() *cli.Command {
 				Required:    true,
 				Destination: &config,
 			},
-			&cli.StringFlag{
+			&cli.StringSliceFlag{
 				Name:        "name",
 				Required:    true,
-				Destination: &name,
+				Destination: names,
 			},
 		},
 		Action: func(context *cli.Context) error {
@@ -147,21 +147,26 @@ func backupDeleteCommand() *cli.Command {
 				return err
 			}
 
-			specificBackup := utils.GetFileByName(backups, name)
-			if specificBackup == nil {
-				return fmt.Errorf("no such file - %s", name)
+			var backupsToDelete []os.FileInfo
+
+			for _, name := range names.Value() {
+				specificBackup := utils.GetFileByName(backups, name)
+				if specificBackup == nil {
+					return fmt.Errorf("no such file - %s", name)
+				}
+				backupsToDelete = append(backupsToDelete, specificBackup)
 			}
 
-			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
-			s.Start()
-			fullPath := path.Join(location, specificBackup.Name())
-			err = os.Remove(fullPath)
-			if err != nil {
-				return err
+			for _, file := range backupsToDelete {
+				s, _ := pterm.DefaultSpinner.Start("Deleting..")
+				fullPath := path.Join(location, file.Name())
+				err = os.Remove(fullPath)
+				if err != nil {
+					s.Fail()
+					return err
+				}
+				s.Success("Deleted ", fullPath)
 			}
-			s.Stop()
-
-			pterm.Success.Println("Deleted ", fullPath)
 
 			return nil
 		},
