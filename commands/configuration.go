@@ -2,6 +2,7 @@ package commands
 
 import (
 	"db-backup/configuration"
+	"db-backup/drivers"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/urfave/cli/v2"
@@ -16,6 +17,7 @@ func ConfigurationCommands() *cli.Command {
 			configurationEditCommand(),
 			configurationDeleteCommand(),
 			configurationListCommand(),
+			configurationTestCommand(),
 		},
 	}
 }
@@ -83,6 +85,37 @@ func configurationEditCommand() *cli.Command {
 			}
 
 			fmt.Println("Data successfully saved")
+			return nil
+		},
+	}
+}
+
+func configurationTestCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "test",
+		Usage: "Test an existing database configuration",
+		Action: func(context *cli.Context) error {
+			name, err := promptValidConfigurationName()
+			if err != nil {
+				return err
+			}
+
+			cfg, err := configuration.Read()
+			if err != nil {
+				return err
+			}
+
+			testingConfig := cfg.Databases[name]
+			client, err := drivers.CreateDbClient(testingConfig)
+			if err != nil {
+				return err
+			}
+
+			err = client.TestConnection()
+			if err != nil {
+				return err
+			}
+
 			return nil
 		},
 	}
