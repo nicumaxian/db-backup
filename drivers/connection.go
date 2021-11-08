@@ -8,6 +8,7 @@ import (
 type DbClient interface {
 	Backup(path string) error
 	Restore(path string) error
+	TestConnection() error
 }
 
 func CreateDbClient(conf configuration.DbConfiguration) (DbClient, error) {
