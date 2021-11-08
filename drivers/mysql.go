@@ -14,10 +14,6 @@ type MySqlDbClient struct {
 	config configuration.DbConfiguration
 }
 
-func init() {
-	//sql.Register("mysql", &mysql.MySQLDriver{})
-}
-
 func (m MySqlDbClient) Backup(path string) error {
 	spinner, err := pterm.DefaultSpinner.Start("Backing up...")
 	if err != nil {
@@ -39,7 +35,7 @@ func (m MySqlDbClient) Backup(path string) error {
 		spinner.Fail("Unable to create file for backup")
 		return err
 	}
-	//
+
 	cmd.Stdout = file
 	defer file.Close()
 
