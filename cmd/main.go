@@ -4,8 +4,8 @@ import (
 	"db-backup/commands"
 	"db-backup/configuration"
 	"db-backup/storage"
+	"github.com/pterm/pterm"
 	"github.com/urfave/cli/v2"
-	"log"
 	"os"
 )
 
@@ -46,6 +46,6 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		log.Panic(err)
+		pterm.Error.Println(err)
 	}
 }

@@ -18,12 +18,7 @@ func RestoreCommand() *cli.Command {
 	var configName string
 	var latest bool
 	var backupName string
-
-	configurationFlag := &cli.StringFlag{
-		Name:        "configuration",
-		Required:    true,
-		Destination: &configName,
-	}
+	var bucket string
 
 	latestFlag := &cli.BoolFlag{
 		Name:        "latest",
@@ -41,7 +36,8 @@ func RestoreCommand() *cli.Command {
 		Name:  "restore",
 		Usage: "Restore a backup",
 		Flags: []cli.Flag{
-			configurationFlag,
+			configurationFlag(&configName),
+			bucketFlag(&bucket),
 			latestFlag,
 			specificBackupFlag,
 		},
@@ -61,7 +57,7 @@ func RestoreCommand() *cli.Command {
 				return err
 			}
 
-			backups, directory, err := storage.GetBackups(configName)
+			backups, directory, err := storage.GetBackups(configName, bucket)
 			if err != nil {
 				return err
 			}

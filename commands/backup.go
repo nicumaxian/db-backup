@@ -29,14 +29,12 @@ func BackupCommand() *cli.Command {
 
 func backupCreateCommand() *cli.Command {
 	var name string
+	var bucket string
 	return &cli.Command{
 		Name: "create",
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "configuration",
-				Required:    true,
-				Destination: &name,
-			},
+			configurationFlag(&name),
+			bucketFlag(&bucket),
 		},
 		Action: func(context *cli.Context) error {
 			err := survey.ComposeValidators(validateName(), validateExistingConfigEntry())(name)
@@ -49,7 +47,7 @@ func backupCreateCommand() *cli.Command {
 				return err
 			}
 
-			path, err := storage.GetNewBackupPath(name)
+			path, err := storage.GetNewBackupPath(name, bucket)
 			if err != nil {
 				return err
 			}
@@ -75,14 +73,12 @@ func backupCreateCommand() *cli.Command {
 
 func backupListCommand() *cli.Command {
 	var name string
+	var bucket string
 	return &cli.Command{
 		Name: "list",
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "configuration",
-				Required:    true,
-				Destination: &name,
-			},
+			configurationFlag(&name),
+			bucketFlag(&bucket),
 		},
 		Action: func(context *cli.Context) error {
 			err := survey.ComposeValidators(validateName(), validateExistingConfigEntry())(name)
@@ -90,7 +86,7 @@ func backupListCommand() *cli.Command {
 				return err
 			}
 
-			result, _, err := storage.GetBackups(name)
+			result, _, err := storage.GetBackups(name, bucket)
 			if err != nil {
 				return err
 			}
@@ -121,15 +117,13 @@ func backupListCommand() *cli.Command {
 func backupDeleteCommand() *cli.Command {
 	var names = &cli.StringSlice{}
 	var config string
+	var bucket string
 	return &cli.Command{
 		Name:        "delete",
 		Description: "Delete existing backup file(s)",
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "configuration",
-				Required:    true,
-				Destination: &config,
-			},
+			configurationFlag(&config),
+			bucketFlag(&bucket),
 			&cli.StringSliceFlag{
 				Name:        "name",
 				Required:    true,
@@ -142,7 +136,7 @@ func backupDeleteCommand() *cli.Command {
 				return err
 			}
 
-			backups, location, err := storage.GetBackups(config)
+			backups, location, err := storage.GetBackups(config, bucket)
 			if err != nil {
 				return err
 			}
