@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-func getBackupDataLocation(configurationName string, category string) (string, error) {
-	fullPath := path.Join(AppDir, "data", configurationName, category)
+func getBackupDataLocation(configurationName string, bucket string) (string, error) {
+	fullPath := path.Join(AppDir, "data", configurationName, bucket)
 	err := os.MkdirAll(fullPath, os.ModePerm)
 	if err != nil {
 		return "", nil
@@ -20,8 +20,8 @@ func getBackupDataLocation(configurationName string, category string) (string, e
 	return fullPath, nil
 }
 
-func GetNewBackupPath(configurationName string, category string) (string, error) {
-	location, err := getBackupDataLocation(configurationName, category)
+func GetNewBackupPath(configurationName string, bucket string) (string, error) {
+	location, err := getBackupDataLocation(configurationName, bucket)
 	if err != nil {
 		return "", err
 	}
@@ -32,8 +32,8 @@ func GetNewBackupPath(configurationName string, category string) (string, error)
 	return backupPath, nil
 }
 
-func GetBackups(configurationName string, category string) ([]fs.FileInfo, string, error) {
-	location, err := getBackupDataLocation(configurationName, category)
+func GetBackups(configurationName string, bucket string) ([]fs.FileInfo, string, error) {
+	location, err := getBackupDataLocation(configurationName, bucket)
 	if err != nil {
 		return []fs.FileInfo{}, "", err
 	}
