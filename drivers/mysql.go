@@ -80,8 +80,7 @@ func (m MySqlDbClient) Restore(path string) error {
 }
 
 func (m MySqlDbClient) TestConnection() error {
-	spinner, _ := pterm.DefaultSpinner.Start("Killing connections")
-
+	spinner, _ := pterm.DefaultSpinner.Start()
 	cmd := exec.Command(
 		"mysql",
 		"-u", m.config.Username,
@@ -92,9 +91,6 @@ func (m MySqlDbClient) TestConnection() error {
 		m.config.Database,
 	)
 	cmd.Env = append(cmd.Env, fmt.Sprintf("MYSQL_PWD=%v", m.config.Password))
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
 	err := cmd.Run()
 	if err != nil {
