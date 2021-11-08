@@ -180,8 +180,8 @@ func backupCleanCommand() *cli.Command {
 			bucketFlag(&bucket),
 			&cli.DurationFlag{
 				Name: "duration",
+				Required: true,
 				Destination: &duration,
-				Value: time.Hour * 24 * 90,
 				Usage: "clean backups older than",
 			},
 		},
