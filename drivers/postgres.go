@@ -16,6 +16,31 @@ type PostgresDbClient struct {
 	config configuration.DbConfiguration
 }
 
+func (p PostgresDbClient) TestConnection() error {
+	spinner, _ := pterm.DefaultSpinner.Start("Killing connections")
+	connStr := fmt.Sprintf("host=%v user=%v password=%v database=%v sslmode=disable", p.config.Host, p.config.Username, p.config.Password, p.config.Database)
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		spinner.Fail("failed to open connection to database")
+		return err
+	}
+
+	_, err = db.Exec("select now()")
+	if err != nil {
+		spinner.Fail("connection test failed")
+		return err
+	}
+
+	err = db.Close()
+	if err != nil {
+		spinner.Fail("failed to close connection")
+		return err
+	}
+	spinner.Success("connection test succeeded")
+
+	return nil
+}
+
 func (p PostgresDbClient) Backup(path string) error {
 	spinner, err := pterm.DefaultSpinner.Start("Backing up...")
 	if err != nil {
@@ -46,7 +71,7 @@ func (p PostgresDbClient) Backup(path string) error {
 
 func (p PostgresDbClient) Restore(path string) error {
 	spinner, _ := pterm.DefaultSpinner.Start("Killing connections")
-	connStr := fmt.Sprintf("host=%v user=%v password=%v", p.config.Host, p.config.Username, p.config.Password)
+	connStr := fmt.Sprintf("host=%v user=%v password=%v sslmode=disable", p.config.Host, p.config.Username, p.config.Password)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		spinner.Fail("Failed to open connection to database")
@@ -81,6 +106,7 @@ func (p PostgresDbClient) Restore(path string) error {
 	spinner, _ = pterm.DefaultSpinner.Start("Restoring data")
 	cmd := exec.Command("psql", "-U", p.config.Username, "-h", p.config.Host, "-f", path, p.config.Database)
 	cmd.Env = append(cmd.Env, fmt.Sprintf("PGPASSWORD=%v", p.config.Password))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("PATH=%v", os.Getenv("PATH")))
 	err = cmd.Run()
 	if err != nil {
 		spinner.Fail("Restore failed")

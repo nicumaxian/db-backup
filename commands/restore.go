@@ -6,6 +6,7 @@ import (
 	"db-backup/storage"
 	"db-backup/utils"
 	"errors"
+	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/pterm/pterm"
 	"github.com/urfave/cli/v2"
@@ -14,23 +15,39 @@ import (
 )
 
 func RestoreCommand() *cli.Command {
-	var name string
+	var configName string
 	var latest bool
+	var backupName string
 	var bucket string
+
+	latestFlag := &cli.BoolFlag{
+		Name:        "latest",
+		Destination: &latest,
+		Usage:       "Use latest existing backup",
+	}
+
+	specificBackupFlag := &cli.StringFlag{
+		Name:        "name",
+		Destination: &backupName,
+		Usage:       "Use specific backup",
+	}
+
 	return &cli.Command{
 		Name:  "restore",
 		Usage: "Restore a backup",
 		Flags: []cli.Flag{
-			configurationFlag(&name),
+			configurationFlag(&configName),
 			bucketFlag(&bucket),
-			&cli.BoolFlag{
-				Name:        "latest",
-				Destination: &latest,
-				Usage:       "Use latest existing backup",
-			},
+			latestFlag,
+			specificBackupFlag,
 		},
 		Action: func(context *cli.Context) error {
-			err := survey.ComposeValidators(validateName(), validateExistingConfigEntry())(name)
+			err := validateFlags(latestFlag, specificBackupFlag)
+			if err != nil {
+				return err
+			}
+
+			err = survey.ComposeValidators(validateName(), validateExistingConfigEntry())(configName)
 			if err != nil {
 				return err
 			}
@@ -40,7 +57,7 @@ func RestoreCommand() *cli.Command {
 				return err
 			}
 
-			backups, directory, err := storage.GetBackups(name, bucket)
+			backups, directory, err := storage.GetBackups(configName, bucket)
 			if err != nil {
 				return err
 			}
@@ -52,13 +69,11 @@ func RestoreCommand() *cli.Command {
 			var usedBackup fs.FileInfo
 
 			if latest {
-				usedBackup = backups[0]
+				usedBackup = getLatestBackup(backups)
+			}
 
-				for _, el := range backups {
-					if el.ModTime().After(usedBackup.ModTime()) {
-						usedBackup = el
-					}
-				}
+			if len(backupName) > 0 {
+				usedBackup = getBackupByName(backups, backupName)
 			}
 
 			if usedBackup == nil {
@@ -67,7 +82,7 @@ func RestoreCommand() *cli.Command {
 
 			pterm.Printf("Restoring %s\n", pterm.Green(usedBackup.Name()))
 
-			client, err := drivers.CreateDbClient(cfg.Databases[name])
+			client, err := drivers.CreateDbClient(cfg.Databases[configName])
 			if err != nil {
 				return err
 			}
@@ -82,4 +97,33 @@ func RestoreCommand() *cli.Command {
 			return nil
 		},
 	}
+}
+
+func validateFlags(latestFlag *cli.BoolFlag, specificBackupFlag *cli.StringFlag) error {
+	if *latestFlag.Destination && len(*specificBackupFlag.Destination) > 0 {
+		return fmt.Errorf("please provide either latest or name flag")
+	}
+
+	return nil
+}
+
+func getLatestBackup(backups []fs.FileInfo) fs.FileInfo {
+	usedBackup := backups[0]
+	for _, el := range backups {
+		if el.ModTime().After(usedBackup.ModTime()) {
+			usedBackup = el
+		}
+	}
+
+	return usedBackup
+}
+
+func getBackupByName(backups []fs.FileInfo, name string) fs.FileInfo {
+	for _, el := range backups {
+		if el.Name() == name {
+			return el
+		}
+	}
+
+	return nil
 }

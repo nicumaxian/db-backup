@@ -5,10 +5,13 @@ import (
 	"db-backup/drivers"
 	"db-backup/storage"
 	"db-backup/utils"
+	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/briandowns/spinner"
 	"github.com/pterm/pterm"
 	"github.com/urfave/cli/v2"
+	"os"
+	"path"
 	"time"
 )
 
@@ -19,6 +22,7 @@ func BackupCommand() *cli.Command {
 		Subcommands: []*cli.Command{
 			backupCreateCommand(),
 			backupListCommand(),
+			backupDeleteCommand(),
 		},
 	}
 }
@@ -104,6 +108,59 @@ func backupListCommand() *cli.Command {
 				})
 			}
 			pterm.DefaultTable.WithHasHeader().WithData(data).Render()
+
+			return nil
+		},
+	}
+}
+
+func backupDeleteCommand() *cli.Command {
+	var names = &cli.StringSlice{}
+	var config string
+	var bucket string
+	return &cli.Command{
+		Name:        "delete",
+		Description: "Delete existing backup file(s)",
+		Flags: []cli.Flag{
+			configurationFlag(&config),
+			bucketFlag(&bucket),
+			&cli.StringSliceFlag{
+				Name:        "name",
+				Required:    true,
+				Destination: names,
+			},
+		},
+		Action: func(context *cli.Context) error {
+			err := survey.ComposeValidators(validateExistingConfigEntry())(config)
+			if err != nil {
+				return err
+			}
+
+			backups, location, err := storage.GetBackups(config, bucket)
+			if err != nil {
+				return err
+			}
+
+			var backupsToDelete []os.FileInfo
+
+			for _, name := range names.Value() {
+				specificBackup := utils.GetFileByName(backups, name)
+				if specificBackup == nil {
+					return fmt.Errorf("no such file - %s", name)
+				}
+				backupsToDelete = append(backupsToDelete, specificBackup)
+			}
+
+			for _, file := range backupsToDelete {
+				s, _ := pterm.DefaultSpinner.Start("Deleting..")
+				fullPath := path.Join(location, file.Name())
+				err = os.Remove(fullPath)
+				if err != nil {
+					s.Fail()
+					return err
+				}
+				s.Success("Deleted ", fullPath)
+			}
 
 			return nil
 		},
