@@ -16,15 +16,13 @@ import (
 func RestoreCommand() *cli.Command {
 	var name string
 	var latest bool
+	var bucket string
 	return &cli.Command{
 		Name:  "restore",
 		Usage: "Restore a backup",
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "configuration",
-				Required:    true,
-				Destination: &name,
-			},
+			configurationFlag(&name),
+			bucketFlag(&bucket),
 			&cli.BoolFlag{
 				Name:        "latest",
 				Destination: &latest,
@@ -42,7 +40,7 @@ func RestoreCommand() *cli.Command {
 				return err
 			}
 
-			backups, directory, err := storage.GetBackups(name)
+			backups, directory, err := storage.GetBackups(name, bucket)
 			if err != nil {
 				return err
 			}

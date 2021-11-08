@@ -25,14 +25,12 @@ func BackupCommand() *cli.Command {
 
 func backupCreateCommand() *cli.Command {
 	var name string
+	var bucket string
 	return &cli.Command{
 		Name: "create",
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "configuration",
-				Required:    true,
-				Destination: &name,
-			},
+			configurationFlag(&name),
+			bucketFlag(&bucket),
 		},
 		Action: func(context *cli.Context) error {
 			err := survey.ComposeValidators(validateName(), validateExistingConfigEntry())(name)
@@ -45,7 +43,7 @@ func backupCreateCommand() *cli.Command {
 				return err
 			}
 
-			path, err := storage.GetNewBackupPath(name)
+			path, err := storage.GetNewBackupPath(name, bucket)
 			if err != nil {
 				return err
 			}
@@ -71,14 +69,12 @@ func backupCreateCommand() *cli.Command {
 
 func backupListCommand() *cli.Command {
 	var name string
+	var bucket string
 	return &cli.Command{
 		Name: "list",
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "configuration",
-				Required:    true,
-				Destination: &name,
-			},
+			configurationFlag(&name),
+			bucketFlag(&bucket),
 		},
 		Action: func(context *cli.Context) error {
 			err := survey.ComposeValidators(validateName(), validateExistingConfigEntry())(name)
@@ -86,7 +82,7 @@ func backupListCommand() *cli.Command {
 				return err
 			}
 
-			result, _, err := storage.GetBackups(name)
+			result, _, err := storage.GetBackups(name, bucket)
 			if err != nil {
 				return err
 			}
