@@ -23,6 +23,7 @@ func BackupCommand() *cli.Command {
 			backupCreateCommand(),
 			backupListCommand(),
 			backupDeleteCommand(),
+			backupCleanCommand(),
 		},
 	}
 }
@@ -150,6 +151,62 @@ func backupDeleteCommand() *cli.Command {
 				}
 				backupsToDelete = append(backupsToDelete, specificBackup)
 			}
+
+			for _, file := range backupsToDelete {
+				s, _ := pterm.DefaultSpinner.Start("Deleting..")
+				fullPath := path.Join(location, file.Name())
+				err = os.Remove(fullPath)
+				if err != nil {
+					s.Fail()
+					return err
+				}
+				s.Success("Deleted ", fullPath)
+			}
+
+			return nil
+		},
+	}
+}
+
+func backupCleanCommand() *cli.Command {
+	var config string
+	var bucket string
+	var duration time.Duration
+	return &cli.Command{
+		Name:        "clean",
+		Description: "Delete old backups",
+		Flags: []cli.Flag{
+			configurationFlag(&config),
+			bucketFlag(&bucket),
+			&cli.DurationFlag{
+				Name: "duration",
+				Destination: &duration,
+				Value: time.Hour * 24 * 90,
+				Usage: "clean backups older than",
+			},
+		},
+		Action: func(context *cli.Context) error {
+			err := survey.ComposeValidators(validateExistingConfigEntry())(config)
+			if err != nil {
+				return err
+			}
+
+			backups, location, err := storage.GetBackups(config, bucket)
+			if err != nil {
+				return err
+			}
+
+			var backupsToDelete []os.FileInfo
+
+			var now = time.Now()
+			for _, el := range backups {
+				expirationTIme := el.ModTime().Add(duration)
+
+				if expirationTIme.Before(now) {
+					backupsToDelete = append(backupsToDelete, el)
+				}
+			}
+
 
 			for _, file := range backupsToDelete {
 				s, _ := pterm.DefaultSpinner.Start("Deleting..")
