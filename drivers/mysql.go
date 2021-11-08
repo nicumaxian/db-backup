@@ -67,6 +67,7 @@ func (m MySqlDbClient) Restore(path string) error {
 		return err
 	}
 	cmd.Stdin = inputFile
+	defer inputFile.Close()
 
 	err = cmd.Run()
 	if err != nil {
