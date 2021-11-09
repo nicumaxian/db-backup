@@ -3,7 +3,6 @@ package drivers
 import (
 	"db-backup/configuration"
 	"fmt"
-	"log"
 )
 
 type DbClient interface {
@@ -12,12 +11,12 @@ type DbClient interface {
 	TestConnection() error
 }
 
-func CreateDbClient(conf configuration.DbConfiguration, logger *log.Logger) (DbClient, error) {
+func CreateDbClient(conf configuration.DbConfiguration) (DbClient, error) {
 	switch conf.Driver {
 	case MySqlDriver:
-		return createMySqlDbClient(conf, logger)
+		return createMySqlDbClient(conf)
 	case PostgresDriver:
-		return createPostgresDbClient(conf, logger)
+		return createPostgresDbClient(conf)
 	default:
 		return nil, fmt.Errorf("driver %v not implemented", conf.Driver)
 	}

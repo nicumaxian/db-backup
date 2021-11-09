@@ -2,9 +2,9 @@ package drivers
 
 import (
 	"db-backup/configuration"
+	"db-backup/logging"
 	"fmt"
 	"github.com/pterm/pterm"
-	"log"
 	"os"
 	"os/exec"
 )
@@ -13,10 +13,10 @@ const MySqlDriver = "mysql"
 
 type MySqlDbClient struct {
 	config configuration.DbConfiguration
-	logger *log.Logger
 }
 
 func (m MySqlDbClient) Backup(path string) error {
+	logger := logging.GetLoggerByVerbose()
 	spinner, err := pterm.DefaultSpinner.Start("Backing up...")
 	if err != nil {
 		return err
@@ -32,6 +32,7 @@ func (m MySqlDbClient) Backup(path string) error {
 	)
 	cmd.Env = append(cmd.Env, fmt.Sprintf("MYSQL_PWD=%v", m.config.Password))
 
+	logger.Println("creating backup file: ", path)
 	file, err := os.Create(path)
 	if err != nil {
 		spinner.Fail("Unable to create file for backup")
@@ -41,6 +42,7 @@ func (m MySqlDbClient) Backup(path string) error {
 	cmd.Stdout = file
 	defer file.Close()
 
+	logger.Println("running command ", cmd.String())
 	err = cmd.Run()
 	if err != nil {
 		spinner.Fail("Backup failed")
@@ -52,6 +54,7 @@ func (m MySqlDbClient) Backup(path string) error {
 }
 
 func (m MySqlDbClient) Restore(path string) error {
+	logger := logging.GetLoggerByVerbose()
 	spinner, _ := pterm.DefaultSpinner.Start("Restoring..")
 	cmd := exec.Command(
 		"mysql",
@@ -61,8 +64,9 @@ func (m MySqlDbClient) Restore(path string) error {
 		"-h", m.config.Host,
 		m.config.Database,
 	)
-
 	cmd.Env = append(cmd.Env, fmt.Sprintf("MYSQL_PWD=%v", m.config.Password))
+
+	logger.Println("prepare backup file ", path)
 	inputFile, err := os.Open(path)
 	if err != nil {
 		spinner.Fail("couldn't open backup file")
@@ -71,6 +75,7 @@ func (m MySqlDbClient) Restore(path string) error {
 	cmd.Stdin = inputFile
 	defer inputFile.Close()
 
+	logger.Println("running command ", cmd.String())
 	err = cmd.Run()
 	if err != nil {
 		spinner.Fail("Restore failed")
@@ -82,6 +87,7 @@ func (m MySqlDbClient) Restore(path string) error {
 }
 
 func (m MySqlDbClient) TestConnection() error {
+	logger := logging.GetLoggerByVerbose()
 	spinner, _ := pterm.DefaultSpinner.Start()
 	cmd := exec.Command(
 		"mysql",
@@ -92,10 +98,11 @@ func (m MySqlDbClient) TestConnection() error {
 		"--protocol=TCP",
 		m.config.Database,
 	)
-	m.logger.Println("executing command: ", cmd.String())
 	cmd.Env = append(cmd.Env, fmt.Sprintf("MYSQL_PWD=%v", m.config.Password))
 
-	cmd.Stdout = m.logger.Writer()
+	logger.Printf("executing command: ", cmd.String())
+
+	cmd.Stdout = logger.Writer()
 	err := cmd.Run()
 	if err != nil {
 		spinner.Fail("connection test failed")
@@ -107,9 +114,8 @@ func (m MySqlDbClient) TestConnection() error {
 	return nil
 }
 
-func createMySqlDbClient(conf configuration.DbConfiguration, logger *log.Logger) (DbClient, error) {
+func createMySqlDbClient(conf configuration.DbConfiguration) (DbClient, error) {
 	return MySqlDbClient{
 		config: conf,
-		logger: logger,
 	}, nil
 }

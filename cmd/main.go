@@ -3,6 +3,7 @@ package main
 import (
 	"db-backup/commands"
 	"db-backup/configuration"
+	"db-backup/logging"
 	"db-backup/storage"
 	"github.com/pterm/pterm"
 	"github.com/urfave/cli/v2"
@@ -14,6 +15,12 @@ func main() {
 		Name:    "db-backup",
 		Usage:   "A tool to backup and restore database easily",
 		Version: "0.1",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name: "verbose",
+				Destination: &logging.Verbose,
+			},
+		},
 		Authors: []*cli.Author{
 			{
 				Name:  "Nicu Maxian",

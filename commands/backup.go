@@ -3,7 +3,6 @@ package commands
 import (
 	"db-backup/configuration"
 	"db-backup/drivers"
-	"db-backup/logging"
 	"db-backup/storage"
 	"db-backup/utils"
 	"fmt"
@@ -54,7 +53,7 @@ func backupCreateCommand() *cli.Command {
 				return err
 			}
 
-			client, err := drivers.CreateDbClient(cfg.Databases[name], logging.NewMockLogger())
+			client, err := drivers.CreateDbClient(cfg.Databases[name])
 			if err != nil {
 				return err
 			}

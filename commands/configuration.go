@@ -3,7 +3,6 @@ package commands
 import (
 	"db-backup/configuration"
 	"db-backup/drivers"
-	"db-backup/logging"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/urfave/cli/v2"
@@ -113,13 +112,8 @@ func configurationTestCommand() *cli.Command {
 				return err
 			}
 
-			logger := logging.NewMockLogger()
-			if verbose {
-				logger = logging.NewBuiltinLogger()
-			}
-
 			testingConfig := cfg.Databases[name]
-			client, err := drivers.CreateDbClient(testingConfig, logger)
+			client, err := drivers.CreateDbClient(testingConfig)
 			if err != nil {
 				return err
 			}
