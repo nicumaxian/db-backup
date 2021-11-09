@@ -3,6 +3,7 @@ package commands
 import (
 	"db-backup/configuration"
 	"db-backup/drivers"
+	"db-backup/logging"
 	"db-backup/storage"
 	"db-backup/utils"
 	"fmt"
@@ -53,7 +54,7 @@ func backupCreateCommand() *cli.Command {
 				return err
 			}
 
-			client, err := drivers.CreateDbClient(cfg.Databases[name])
+			client, err := drivers.CreateDbClient(cfg.Databases[name], logging.NewMockLogger())
 			if err != nil {
 				return err
 			}
@@ -179,10 +180,10 @@ func backupCleanCommand() *cli.Command {
 			configurationFlag(&config),
 			bucketFlag(&bucket),
 			&cli.DurationFlag{
-				Name: "duration",
-				Required: true,
+				Name:        "duration",
+				Required:    true,
 				Destination: &duration,
-				Usage: "clean backups older than",
+				Usage:       "clean backups older than",
 			},
 		},
 		Action: func(context *cli.Context) error {
@@ -206,7 +207,6 @@ func backupCleanCommand() *cli.Command {
 					backupsToDelete = append(backupsToDelete, el)
 				}
 			}
-
 
 			for _, file := range backupsToDelete {
 				s, _ := pterm.DefaultSpinner.Start("Deleting..")

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/pterm/pterm"
+	"log"
 	"os"
 	"os/exec"
 )
@@ -14,6 +15,7 @@ const PostgresDriver = "postgres"
 
 type PostgresDbClient struct {
 	config configuration.DbConfiguration
+	logger *log.Logger
 }
 
 func (p PostgresDbClient) TestConnection() error {
@@ -117,9 +119,10 @@ func (p PostgresDbClient) Restore(path string) error {
 	return nil
 }
 
-func createPostgresDbClient(conf configuration.DbConfiguration) (DbClient, error) {
+func createPostgresDbClient(conf configuration.DbConfiguration, logger *log.Logger) (DbClient, error) {
 
 	return PostgresDbClient{
 		config: conf,
+		logger: logger,
 	}, nil
 }

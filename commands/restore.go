@@ -3,6 +3,7 @@ package commands
 import (
 	"db-backup/configuration"
 	"db-backup/drivers"
+	"db-backup/logging"
 	"db-backup/storage"
 	"db-backup/utils"
 	"errors"
@@ -82,7 +83,7 @@ func RestoreCommand() *cli.Command {
 
 			pterm.Printf("Restoring %s\n", pterm.Green(usedBackup.Name()))
 
-			client, err := drivers.CreateDbClient(cfg.Databases[configName])
+			client, err := drivers.CreateDbClient(cfg.Databases[configName], logging.NewMockLogger())
 			if err != nil {
 				return err
 			}

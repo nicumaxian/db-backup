@@ -4,6 +4,7 @@ import (
 	"db-backup/configuration"
 	"fmt"
 	"github.com/pterm/pterm"
+	"log"
 	"os"
 	"os/exec"
 )
@@ -12,6 +13,7 @@ const MySqlDriver = "mysql"
 
 type MySqlDbClient struct {
 	config configuration.DbConfiguration
+	logger *log.Logger
 }
 
 func (m MySqlDbClient) Backup(path string) error {
@@ -90,8 +92,10 @@ func (m MySqlDbClient) TestConnection() error {
 		"--protocol=TCP",
 		m.config.Database,
 	)
+	m.logger.Println("executing command: ", cmd.String())
 	cmd.Env = append(cmd.Env, fmt.Sprintf("MYSQL_PWD=%v", m.config.Password))
 
+	cmd.Stdout = m.logger.Writer()
 	err := cmd.Run()
 	if err != nil {
 		spinner.Fail("connection test failed")
@@ -103,8 +107,9 @@ func (m MySqlDbClient) TestConnection() error {
 	return nil
 }
 
-func createMySqlDbClient(conf configuration.DbConfiguration) (DbClient, error) {
+func createMySqlDbClient(conf configuration.DbConfiguration, logger *log.Logger) (DbClient, error) {
 	return MySqlDbClient{
 		config: conf,
+		logger: logger,
 	}, nil
 }
