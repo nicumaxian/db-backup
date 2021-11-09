@@ -91,16 +91,9 @@ func configurationEditCommand() *cli.Command {
 }
 
 func configurationTestCommand() *cli.Command {
-	var verbose bool
 	return &cli.Command{
 		Name:  "test",
 		Usage: "Test an existing database configuration",
-		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:        "verbose",
-				Destination: &verbose,
-			},
-		},
 		Action: func(context *cli.Context) error {
 			name, err := promptValidConfigurationName()
 			if err != nil {
